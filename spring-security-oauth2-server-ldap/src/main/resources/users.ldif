@@ -1,0 +1,43 @@
+dn: dc=hendisantika,dc=com
+objectclass: top
+objectclass: domain
+dc: hendisantika
+
+dn: ou=people,dc=hendisantika,dc=com
+objectclass: top
+objectclass: organizationalUnit
+ou: people
+
+dn: ou=groups,dc=hendisantika,dc=com
+objectclass: top
+objectclass: organizationalUnit
+ou: groups
+
+dn: uid=hendi,ou=people,dc=hendisantika,dc=com
+objectclass: top
+objectclass: person
+objectclass: organizationalPerson
+objectclass: inetOrgPerson
+cn: Hendi Santika
+sn: Santika
+uid: hendi
+mail: hendisantika@gmail.com
+userPassword: password
+
+dn: uid=naruto,ou=people,dc=hendisantika,dc=com
+objectclass: top
+objectclass: person
+objectclass: organizationalPerson
+objectclass: inetOrgPerson
+cn: Uzumaki Naruto
+sn: Naruto
+uid: naruto
+mail: naruto@konoha.jp
+userPassword: password
+
+dn: cn=developers,ou=groups,dc=hendisantika,dc=com
+objectclass: top
+objectclass: groupOfUniqueNames
+cn: developers
+uniqueMember: uid=hendi,ou=people,dc=hendisantika,dc=com
+uniqueMember: uid=naruto,ou=people,dc=hendisantika,dc=com
