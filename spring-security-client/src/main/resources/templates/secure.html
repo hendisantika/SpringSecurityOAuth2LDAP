@@ -1,19 +1,20 @@
-<html xmlns:th="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html lang="en" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
-
-    <title>Spring Security OAuth Example</title>
-
+    <meta charset="utf-8"/>
+    <title>Spring Security OAuth2 LDAP Example</title>
 </head>
-
-
 <body>
 
-<h1>Spring Security OAuth Example - Secured</h1>
+<h1>Spring Security OAuth2 LDAP Example - Secured</h1>
 
-Welcome to TechPrimers!
+<p>Welcome, <strong sec:authentication="name">user</strong>!</p>
 
-<span th:text="${#authentication.name}"></span>
+<p>Authorities: <span sec:authentication="principal.authorities">[]</span></p>
+
+<form method="post" th:action="@{/logout}">
+    <button type="submit">Logout</button>
+</form>
+
 </body>
-
 </html>

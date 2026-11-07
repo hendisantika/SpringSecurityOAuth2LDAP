@@ -1,26 +1,30 @@
 server:
   port: 8080
-  session:
   servlet:
     context-path: /ui
     session:
       cookie:
         name: UISESSION
 
-
-security:
-  basic:
-    enabled: false
-  oauth2:
-    client:
-      clientId: ClientId
-      clientSecret: secret
-      accessTokenUri: http://localhost:8081/auth/oauth/token
-      userAuthorizationUri: http://localhost:8081/auth/oauth/authorize
-    resource:
-      userInfoUri: http://localhost:8081/auth/rest/hello/principal
-
-
 spring:
   thymeleaf:
     cache: false
+  security:
+    oauth2:
+      client:
+        registration:
+          ldap-auth:
+            provider: ldap-auth-server
+            client-id: ClientId
+            client-secret: secret
+            client-authentication-method: client_secret_basic
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            scope: openid,profile,user_info
+        provider:
+          ldap-auth-server:
+            authorization-uri: http://localhost:8081/auth/oauth2/authorize
+            token-uri: http://localhost:8081/auth/oauth2/token
+            jwk-set-uri: http://localhost:8081/auth/oauth2/jwks
+            user-info-uri: http://localhost:8081/auth/userinfo
+            user-name-attribute: sub
