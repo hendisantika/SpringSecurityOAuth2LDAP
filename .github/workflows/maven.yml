@@ -1,10 +1,5 @@
-# This workflow will build a Java project with Maven, and cache/restore any dependencies to improve the workflow execution time
+# This workflow builds & tests every Maven module with JDK 25 and caches dependencies.
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-maven
-
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
 
 name: Java CI with Maven
 
@@ -13,26 +8,70 @@ on:
     branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
-
+    name: Build ${{ matrix.module }}
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        module:
+          - spring-security-oauth2-server-ldap
+          - spring-security-client
+    defaults:
+      run:
+        working-directory: ${{ matrix.module }}
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up JDK 21
-      uses: actions/setup-java@v4
-      with:
-        java-version: '21'
-        distribution: 'temurin'
-        cache: maven
-    - name: Build with Maven for spring-security-client
-      run: mvn -B package --file ./spring-security-client/pom.xml
+      - uses: actions/checkout@v7
 
-    - name: Build with Maven for spring-security-oauth2-server-ldap
-      run: mvn -B package --file ./spring-security-oauth2-server-ldap/pom.xml
+      - name: Set up JDK 25
+        uses: actions/setup-java@v6
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+          cache: maven
+          cache-dependency-path: ${{ matrix.module }}/pom.xml
 
-    # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
-    - name: Update dependency graph
-      uses: advanced-security/maven-dependency-submission-action@4f64ddab9d742a4806eeb588d238e4c311a8397d
+      - name: Build & test with Maven Wrapper
+        run: ./mvnw -B -ntp verify
+
+  dependency-graph:
+    name: Submit dependency graph
+    # Only on push to master: PRs (incl. Dependabot) get a read-only token
+    if: github.event_name == 'push'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    strategy:
+      matrix:
+        module:
+          - spring-security-oauth2-server-ldap
+          - spring-security-client
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v6
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+          cache: maven
+          cache-dependency-path: ${{ matrix.module }}/pom.xml
+
+      # Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts
+      - name: Update dependency graph
+        uses: advanced-security/maven-dependency-submission-action@v6
+        with:
+          directory: ${{ matrix.module }}
+          correlator: ${{ github.job }}-${{ matrix.module }}
